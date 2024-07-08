@@ -18,7 +18,7 @@ services:
         condition: on-failure
       resources:
         limits:
-          cpus: 1
+          cpus: '1'
           memory: 1024M
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
