@@ -8,3 +8,6 @@ down:
 dev:
 	docker exec -it mygptreader-web-1 /bin/bash
 
+logs:
+	docker logs -f  mygptreader-web-1
+
