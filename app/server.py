@@ -276,14 +276,17 @@ def bot_messages(message, next):
 
 @slack_app.event(event="message", middleware=[bot_messages])
 def log_message(logger, event, say):
-    
-    try:
-        if is_premium_user(event["user"]):
-            bot_process(event, say, logger)
-        else:
-            say(f'This feature is exclusive to Premium users. To chat with the bot directly, please subscribe to our Premium plan to support our service. You can find the payment link by clicking on the bot and selecting the Home tab.', thread_ts=event["ts"])
-    except Exception as e:
-        logger.error(f"Error responding to direct message: {e}")
+    if "user" not in event: 
+        logger.info("Incorrect message format was entered: " + str(event))
+    else:
+        logger.info(json.dumps(event, ensure_ascii=False, indent=4))
+        try:
+            if is_premium_user(event["user"]):
+                bot_process(event, say, logger)
+            else:
+                say(f'This feature is exclusive to Premium users. To chat with the bot directly, please subscribe to our Premium plan to support our service. You can find the payment link by clicking on the bot and selecting the Home tab.', thread_ts=event["ts"])
+        except Exception as e:
+            logger.error(f"Error responding to direct message: {e}")
 
 @slack_app.event(event="team_join")
 def send_welcome_message(logger, event):
