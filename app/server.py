@@ -1,4 +1,6 @@
 import logging
+logging.basicConfig(level=logging.INFO)
+
 import re
 import os
 import json
