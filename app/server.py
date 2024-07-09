@@ -1,6 +1,7 @@
 import logging
 import re
 import os
+import json
 from datetime import datetime
 import requests
 from urllib.parse import urlparse
@@ -275,6 +276,7 @@ def bot_messages(message, next):
 
 @slack_app.event(event="message", middleware=[bot_messages])
 def log_message(logger, event, say):
+    
     try:
         if is_premium_user(event["user"]):
             bot_process(event, say, logger)
