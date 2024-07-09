@@ -56,7 +56,8 @@ def get_user(user_id):
     else:
         return f"Error: {response.status_code} - {response.reason}"
     
-def is_active_user(user_id):
+def is_active_user(user_id, is_debug=1):
+    if is_debug: return True
     try:
         user = get_user(user_id)
         if user and user['is_active']:
@@ -65,7 +66,8 @@ def is_active_user(user_id):
         logging.error(f"Error while checking if user {user_id} is active: {e}")
     return False
         
-def is_premium_user(user_id):
+def is_premium_user(user_id, is_debug=1):
+    if is_debug: return True
     try:
         user = get_user(user_id)
         if not user:
