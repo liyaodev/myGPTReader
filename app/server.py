@@ -4,10 +4,15 @@ logging.basicConfig(level=logging.INFO)
 import re
 import os
 import json
+import time
+import uuid
 from datetime import datetime
 import requests
 from urllib.parse import urlparse
-from flask import Flask, request
+from flask import Flask, request, jsonify
+import werkzeug
+from werkzeug.exceptions import HTTPException
+
 from flask_apscheduler import APScheduler
 from slack_bolt import App, BoltResponse
 from slack_bolt.adapter.flask import SlackRequestHandler
@@ -18,6 +23,7 @@ from app.gpt import get_answer_from_chatGPT, get_answer_from_llama_file, get_ans
 from app.rate_limiter import RateLimiter
 from app.user import get_user, is_premium_user, is_active_user, update_message_token_usage
 from app.util import md5
+from app.aireader import summary_handle
 
 class Config:
     SCHEDULER_API_ENABLED = True
@@ -69,6 +75,33 @@ def schedule_news():
 @app.route("/slack/events", methods=["POST"])
 def slack_events():
     return slack_handler.handle(request)
+
+@app.route("/aireader/summary/v1", methods=["GET", "POST"])
+def aireader_summary_v1():
+    start_time  = time.time()
+    req_id      = str(uuid.uuid1())
+    
+    req_dict    = request.form if request.form else request.json
+    req_dict    = req_dict.to_dict() if isinstance(req_dict, werkzeug.datastructures.ImmutableMultiDict) else req_dict
+    req_dict    = json.loads(json.dumps(req_dict, sort_keys=True)) # 参数按key值排序，避免因顺序导致缓存不命中
+    
+    req_url = req_dict.get("url", "")
+    if not req_url:
+        result = {
+            "code": 10000,
+            "message": "请求参数错误",
+            "req_id": req_id
+        }
+    try:
+        result = summary_handle(req_url, req_id)
+    except Exception as e:
+        logging.error("summary handle is error: ", str(e))
+        result = {
+            "code": 19999,
+            "message": "服务运行报错",
+            "req_id": req_id
+        }
+    return jsonify(result)
 
 def insert_space(text):
 

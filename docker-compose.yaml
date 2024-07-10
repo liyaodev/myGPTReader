@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   web:
-    image: liyaodev/my-gpt-reader:lastest
+    image: liyaodev/my-gpt-reader:v1.0.0
     user: root
     build:
       context: .
